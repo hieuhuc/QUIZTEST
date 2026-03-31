@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isQuizAuthor(quizId) {
+      return isAuthenticated() && get(/databases/$(database)/documents/quizzes/$(quizId)).data.authorId == request.auth.uid;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Quizzes
+    match /quizzes/{quizId} {
+      allow read: if true; // Students need to see quiz metadata
+      allow create: if isAuthenticated();
+      allow update, delete: if isQuizAuthor(quizId);
+
+      // Questions
+      match /questions/{questionId} {
+        allow read: if true;
+        allow write: if isQuizAuthor(quizId);
+      }
+
+      // Answers (Secret)
+      match /answers/{questionId} {
+        allow read, write: if isQuizAuthor(quizId);
+      }
+
+      // Results
+      match /results/{resultId} {
+        allow read: if isQuizAuthor(quizId);
+        allow create: if true; // Students submit results
+        allow update, delete: if isQuizAuthor(quizId);
+      }
+    }
+  }
+}

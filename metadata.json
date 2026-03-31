@@ -1,0 +1,5 @@
+{
+  "name": "Hệ thống Kiểm tra AI-QuizMaster",
+  "description": "Hệ thống kiểm tra trắc nghiệm thông minh cho sinh viên đại học, hỗ trợ tạo câu hỏi bằng AI và file Word.",
+  "requestFramePermissions": []
+}
